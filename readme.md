@@ -1,0 +1,1 @@
+This project belongs to hzambrellas graduation project.It uses to simulate data exchange between server and sink node ,which manage wireless sensor in monitor area in smart building.The language is golang.

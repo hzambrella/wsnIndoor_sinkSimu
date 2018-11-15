@@ -1,0 +1,62 @@
+package interceptor
+
+import (
+	
+	"github.com/gin-gonic/gin"
+	"tool/inicfg"
+	"tool/redis"
+)
+
+//用户信息
+type userInfo struct {
+	Uid      int    `json:"uid"`
+	UserName string `json:"user_name"`
+}
+
+//cookie存活时间
+const COOKIE_MAX_MAX_AGE = time.Hour * 1 / time.Second // 单位：秒。
+
+var (
+	//cookies name
+	cookie       string = "nd_machine_user"
+	maxAge              = int(COOKIE_MAX_MAX_AGE)
+	userNotFound        = errors.New("user not found")
+)
+
+func getUser(key string) (*userInfo, error) {
+	rc, err := redis.GetRedisClient()
+
+	if err != nil {
+		if err == redis.ErrNil {
+			return nil, userNotFound
+		}
+		c.String(500, "redis serve is error")
+		return
+	}
+
+	user := &userInfo{}
+	if err := rc.Scan(key, user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func Login(c *gin.Context) {
+	ck, err := c.Cookie(cookie)
+	if err != nil {
+		fmt.Println(err)
+		c.String(500, "cookie error:"+err.toString())
+		return
+	}
+
+	user, err := getUser(ck)
+	if err != nil {
+		if err==userNotFound{
+			c.Redirect()
+		}
+	}
+
+	c.next()
+	return
+}

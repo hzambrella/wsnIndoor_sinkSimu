@@ -1,0 +1,14 @@
+.title {
+    font-size: 2rem;
+    line-height: 3rem;
+    text-align: center;
+    margin: 3vw;
+}
+
+.content form {
+    text-align: center;
+}
+
+.submit {
+    width: 20vw;
+}

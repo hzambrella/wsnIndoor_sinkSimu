@@ -1,0 +1,181 @@
+{{define "machine/login"}}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>用户登录</title>
+    <link rel="stylesheet" type="text/css" href="/public/css/lib/common.css">
+    <link rel="stylesheet" type="text/css" href="/public/css/login.css">
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="content">
+        <p class="title">登录</p>
+        <form>
+            账 号：
+            <input type="text" id="account" autofocus required></input><span id="accountStatus"></span>
+            <br>
+            <br> 密 码：
+            <input type="password" id="password" required></input><span id="passwordStatus"></span>
+            <br>
+            <br>
+            <input id="submit" class="submit" type="button" value="登录"></input>
+           
+        </form>
+    </div>
+    <input id="reqPath" type="hidden" value="{{.reqPath}}">
+    <script type="text/javascript">
+ 
+    var accountCache = [];
+    var accountMes = [];
+    var accountIsValid = [];
+    var requestNumber = 0; //请求次数，避免频繁请求
+    var submitNumber = 0;
+    var maxRequestNumber = 3; //避免频繁请求
+    var lock = false;
+    $(document).ready(function() {
+        //帐号失去焦点发送ajax，验证帐号是否存在
+        $("#account").blur(function(event) {
+            if (lock) {
+                $("#accountStatus").html("请求过于频繁，请稍后再试")
+                return
+            }
+
+            account = $("#account").val()
+            if (account == "") {
+                $("#accountStatus").html("请输入用户名")
+                return
+            }
+
+            if (requestNumber >= maxRequestNumber) {
+                $("#accountStatus").html("请求过于频繁，请稍后再试")
+                lock = true
+                setTimeout("resetLimit()", 5000)
+                return
+            }
+
+            account_index = in_array(account, accountCache)
+            //alert(account_index)
+            if (account_index >= 0) {
+                $("#accountStatus").html(accountCache[account_index])
+                return
+            }
+            //console.log(account_index)
+            requestNumber = requestNumber + 1
+            $.ajax({
+                type: "POST",
+                url: "/machine/check/user",
+                data: {
+                    "account": account
+                },
+                success: function(msg) {
+                    console.log(JSON.stringify(msg))
+                    $("#accountStatus").html(msg.message);
+                    //无效的用户名缓存，避免重复提交请求
+                    accountCache.push(account)
+                    accountMes.push(msg.message)
+                    accountIsValid.push(msg.isValid)
+                    //console.log(accountCache)
+                    //console.log(accountMes)
+                    //console.log(accountIsValid)
+                },
+                error: function(result) {
+
+                    $("#accountStatus").html(result.responseText);
+                    // alert("帐号查询发生错误");
+                },
+            });
+        });
+
+        //提交发送ajax
+        // var eId = $('#uId').val();
+        var reqPath = $('#reqPath').val();
+
+        $("#submit").click(function() {
+            //alert(1)
+            if (lock) {
+                $("#accountStatus").html("请求过于频繁，请稍后再试")
+                return
+            }
+
+            submitNumber = submitNumber + 1
+            account = $("#account").val()
+            if (account == "") {
+                $("#accountStatus").html("请输入用户名")
+                return
+            }
+
+            password = $("#password").val()
+            if (password == "") {
+                $("#passwordStatus").html("请输入密码")
+                return
+            }
+
+            if (submitNumber >= maxRequestNumber) {
+                $("#accountStatus").html("请求过于频繁，请稍后再试")
+                lock = true
+                setTimeout("resetLimit()", 5000)
+                return
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/machine/check/pass",
+                data: {
+                    account: account,
+                    passWord: password,
+                },
+                success: function(msg) {
+                    console.log(JSON.stringify(msg))
+                    if (!msg.isValid) {
+                        //无效的用户名缓存，避免重复提交请求
+                        $("#accountStatus").html(msg.message);
+                        accountCache.push(account)
+                        accountMes.push(msg.message)
+                        accountIsValid.push(msg.isValid)
+                        return
+                    }
+
+                    if (msg.wrongPass) {
+                        $("#passwordStatus").html(msg.message);
+                        return
+                    }
+                    $("#passwordStatus").html(msg.message);
+                    location.replace(reqPath)
+                },
+                error: function(result) {
+                    $("#passwordStatus").html(result.responseText);
+                    // alert("密码查询发生错误");
+                },
+            });
+
+        });
+    });
+
+    //字符串是否在数组中,不存在返回-1，存在返回索引
+    function in_array(stringToSearch, arrayToSearch) {
+        for (s = 0; s < arrayToSearch.length; s++) {
+            thisEntry = arrayToSearch[s].toString();
+            if (thisEntry == stringToSearch) {
+                return s;
+            }
+        }
+        return -1;
+    }
+
+    function resetLimit() {
+        requestNumber = 0;
+        submitNumber = 0;
+        lock = false;
+        console.log("复位请求功能")
+        $("#accountStatus").html("");
+        $("#passwordStatus").html("");
+    }
+    </script>
+</body>
+
+</html>
+{{end}}

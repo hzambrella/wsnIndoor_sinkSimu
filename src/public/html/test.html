@@ -1,0 +1,57 @@
+{{define "machine/test"}}
+
+<head>
+
+    <script type=text/javascript src=/public/js/test.js></script>
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+    <p>用户id:{{.map}}</p>
+    <input type="hidden" id="idkey" value="" />
+    <img id="img" src="" />
+    <button id="getCode"> 获取验证码</button>
+    <button id="checkCode"> 检测验证码</button>
+    <input type="text" id="captchaAnswer" />
+</body>
+<script>
+    document.ready = test()
+    $("#getCode").click(function () {
+        var value = $("#captchaAnswer").val()
+        var idkey = $("#idkey").val()
+        console.log(value, idkey)
+        $.ajax({
+            type: "GET",
+            url: "/machine/getCaptcha",
+            success: function (msg) {
+                $("#idkey").val(msg.idkey)
+                $("#img").attr("src", msg.base64img)
+                $("#getCode").text("看不清,换一张")
+            },
+            error: function (result) {
+                alert(result.responseText);
+            },
+        });
+    })
+
+    $("#checkCode").click(function () {
+        var value = $("#captchaAnswer").val()
+        var idkey = $("#idkey").val()
+        console.log(value, idkey)
+        $.ajax({
+            type: "POST",
+            url: "/machine/checkCaptcha",
+            data: {
+                "idkey": idkey,
+                "value": value,
+            },
+            success: function (msg) {
+                alert(msg)
+            },
+            error: function (result) {
+                alert(result.responseText);
+            },
+        });
+    })
+</script>
+{{end}}

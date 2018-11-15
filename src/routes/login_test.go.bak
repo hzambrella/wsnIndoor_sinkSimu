@@ -1,0 +1,74 @@
+package routes
+
+import (
+
+	//"net/http"
+	//"net/http/httputil"
+	//"net/url"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"testing"
+
+	"model/machine"
+	"tool/errors"
+
+	"github.com/qiniu/log"
+	"github.com/xxtea/xxtea-go/xxtea"
+)
+
+//测试
+/*
+func TestMachine(t *testing.T) {
+	values := url.Values{}
+
+	values.Add("userName", "root1")
+	resp, err := http.PostForm("http://127.0.0.1:8111/machine/check/user", values)
+	if err != nil {
+		t.Fatal(err)
+	}
+	by, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(string(by))
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatal(resp.Status)
+	}
+}
+*/
+func TestCode(t *testing.T) {
+	db, err := machine.NewUserDB()
+	if err != nil {
+		t.Fatal(err)
+
+		return
+	}
+
+	kbase, err := db.GetUserBase(2)
+	if err != nil {
+		log.Warn(err)
+		if errors.Equal(err, machine.UserDataNotFound) {
+			t.Fatal(err)
+			return
+		}
+		t.Fatal(err)
+		return
+	}
+
+	saleMap := make(map[string]interface{}, 0)
+	saleMap["purchaseId"] = 4
+	saleMap["sellerId"] = 3
+	b, err := json.Marshal(saleMap)
+	if err != nil {
+		log.Warn(err)
+		t.Fatal(err)
+		return
+	}
+
+	bstr := base64.URLEncoding.EncodeToString(b)
+	result := xxtea.Encrypt([]byte(bstr), []byte(kbase))
+
+	fmt.Println(string(result))
+}
