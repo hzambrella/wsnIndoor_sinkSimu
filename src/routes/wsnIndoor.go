@@ -40,17 +40,8 @@ func startLocAnchor(c *gin.Context){
 		return
 	}
 
-	floor, err := VarsValueInt(c, "floor")
-	if err != nil {
-		log.Warn(err)
-		c.JSON(500, paramWrongFormat("floor"))
-		return
-	}
-
-
 	c.JSON(200,gin.H{
 		"nid":nid,
-		"floor":floor,
 	})
 }
 
@@ -63,13 +54,6 @@ func getHigherAnchorHop(c *gin.Context) {
 		return
 	}
 
-	floor, err := VarsValueInt(c, "floor")
-	if err != nil {
-		log.Warn(err)
-		c.JSON(500, paramWrongFormat("floor"))
-		return
-	}
-
 	db, err := sensor.NewSensorDB()
 	if err != nil {
 		log.Warn(err)
@@ -77,7 +61,7 @@ func getHigherAnchorHop(c *gin.Context) {
 		return
 	}
 
-	anchorsHigher, err := db.GetXYAnchor(int(nid), int(floor), sensor.AnchorTypeHiger)
+	anchorsHigher, err := db.GetXYAnchor(nid,sensor.AnchorTypeHiger)
 	if err != nil {
 		if err != sensor.AnchorDataNotFound {
 			log.Warn(err)
@@ -86,7 +70,7 @@ func getHigherAnchorHop(c *gin.Context) {
 		}
 	}
 
-	anchorsNormal, err := db.GetXYAnchor(nid, floor, sensor.AnchorTypeNormal)
+	anchorsNormal, err := db.GetXYAnchor(nid, sensor.AnchorTypeNormal)
 	if err != nil {
 		if err != sensor.AnchorDataNotFound {
 			log.Warn(err)
@@ -98,7 +82,7 @@ func getHigherAnchorHop(c *gin.Context) {
 	//higher anchor在前面
 	anchors:=append(anchorsHigher,anchorsNormal...)
 	
-	anchorRadius,err:=db.GetAnchorRadius(nid, floor)
+	anchorRadius,err:=db.GetAnchorRadius(nid)
 	if err != nil {
 		if err != sensor.NetworkDataNotFound {
 			log.Warn(err)
@@ -144,13 +128,6 @@ func getNormalAnchorHop(c *gin.Context) {
 		return
 	}
 
-	floor, err := VarsValueInt(c, "floor")
-	if err != nil {
-		log.Warn(err)
-		c.JSON(500, paramWrongFormat("floor"))
-		return
-	}
-
 	db, err := sensor.NewSensorDB()
 	if err != nil {
 		log.Warn(err)
@@ -158,7 +135,7 @@ func getNormalAnchorHop(c *gin.Context) {
 		return
 	}
 
-	anchorsHigher, err := db.GetXYAnchor(int(nid), int(floor), sensor.AnchorTypeHiger)
+	anchorsHigher, err := db.GetXYAnchor(nid,sensor.AnchorTypeHiger)
 	if err != nil {
 		if err != sensor.AnchorDataNotFound {
 			log.Warn(err)
@@ -167,7 +144,7 @@ func getNormalAnchorHop(c *gin.Context) {
 		}
 	}
 
-	anchorsNormal, err := db.GetXYAnchor(nid, floor, sensor.AnchorTypeNormal)
+	anchorsNormal, err := db.GetXYAnchor(nid, sensor.AnchorTypeNormal)
 	if err != nil {
 		if err != sensor.AnchorDataNotFound {
 			log.Warn(err)
@@ -179,7 +156,7 @@ func getNormalAnchorHop(c *gin.Context) {
 	//higher anchor在前面
 	anchors:=append(anchorsHigher,anchorsNormal...)
 	
-	anchorRadius,err:=db.GetAnchorRadius(nid, floor)
+	anchorRadius,err:=db.GetAnchorRadius(nid)
 	if err != nil {
 		if err != sensor.NetworkDataNotFound {
 			log.Warn(err)

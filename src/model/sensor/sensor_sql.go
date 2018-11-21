@@ -7,7 +7,7 @@ const (
 	SELECT 
 		gid,layer as type ,st_x(geom)as x,st_y(geom)as y 
 	FROM 
-		gsimu_%d_%d_anchor
+		gsimu_%d_anchor
 	WHERE 
 		layer=$1
 	`
@@ -16,11 +16,11 @@ const (
 const (
 	getAnchorRadiusSql = `
 	SELECT 
-		nid,anchor_radius,floor
+		nid,anchor_radius
 	FROM 
 		network_simu
 	WHERE 
-		nid=$1 AND floor=$2
+		nid=$1
 	`
 )
 
@@ -31,6 +31,6 @@ const(
 	SET
 		status=$1
 	WHERE
-		bid=$2 and floor=$3
+		nid=$2 and floor=$3
 	`
 )

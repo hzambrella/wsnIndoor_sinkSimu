@@ -25,9 +25,9 @@ var(
 
 type SensorDB interface {
 	Close()
-	GetXYAnchor(bid int,nid int,anchorType string) ([]Anchor, error)
-	GetAnchorRadius(nid int,floor int)(*AnchorRadius,error)
-	UpdateNetworkStatus(bid,floor int,status int)error
+	GetXYAnchor(nid int,anchorType string) ([]Anchor, error)
+	GetAnchorRadius(nid int,)(*AnchorRadius,error)
+	UpdateNetworkStatus(nid int,status int)error
 }
 
 type sensorDB struct {
@@ -47,12 +47,11 @@ func (db *sensorDB) Close() {
 	db.Close()
 }
 
-func (db *sensorDB)GetAnchorRadius(nid int,floor int)(*AnchorRadius,error){
+func (db *sensorDB)GetAnchorRadius(nid int)(*AnchorRadius,error){
 	anchorRadius:=AnchorRadius{};
-	err:=db.QueryRow(getAnchorRadiusSql,nid,floor).Scan(
+	err:=db.QueryRow(getAnchorRadiusSql,nid).Scan(
 		&anchorRadius.Nid,
 		&anchorRadius.AnchorRadius,
-		&anchorRadius.Floor,
 	)
 
 	if err!=nil{
@@ -65,10 +64,10 @@ func (db *sensorDB)GetAnchorRadius(nid int,floor int)(*AnchorRadius,error){
 	return &anchorRadius,nil
 }
 
-func (db *sensorDB) GetXYAnchor(bid int,nid int,anchorType string) ([]Anchor, error) {
+func (db *sensorDB) GetXYAnchor(nid int,anchorType string) ([]Anchor, error) {
 	anchors := []Anchor{}
 
-	getXYOfAnchorSql:=fmt.Sprintf(getXYOfAnchorSqlTemp,bid,nid)
+	getXYOfAnchorSql:=fmt.Sprintf(getXYOfAnchorSqlTemp,nid)
 	rows, err := db.Query(getXYOfAnchorSql,anchorType)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -97,8 +96,8 @@ func (db *sensorDB) GetXYAnchor(bid int,nid int,anchorType string) ([]Anchor, er
 	return anchors,nil
 }
 
-func (db *sensorDB) UpdateNetworkStatus(bid,floor int,status int)error{
-	_,err:=db.Exec(updateNetworkStatusSql,status,bid,floor)
+func (db *sensorDB) UpdateNetworkStatus(nid int,status int)error{
+	_,err:=db.Exec(updateNetworkStatusSql,status,nid)
 	if err!=nil{
 		return errors.As(err)
 	}

@@ -17,5 +17,4 @@ type Anchor struct {
 type AnchorRadius struct{
 	Nid int
 	AnchorRadius float64 //anchor的通信半径
-	Floor int //楼层
 }

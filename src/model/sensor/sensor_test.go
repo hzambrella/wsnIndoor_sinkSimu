@@ -21,7 +21,7 @@ func init() {
 }
 
 func TestGetXY(t *testing.T){
-	anchors,err:=dbu.GetXYAnchor(1,4,AnchorTypeHiger)
+	anchors,err:=dbu.GetXYAnchor(1,AnchorTypeHiger)
 	if err != nil {
 		if err == AnchorDataNotFound {
 			fmt.Println(AnchorDataNotFound.Error())
@@ -33,7 +33,7 @@ func TestGetXY(t *testing.T){
 }
 
 func TestGetAnchorRadius(t *testing.T){
-	anchorRadius,err:=dbu.GetAnchorRadius(1,4);
+	anchorRadius,err:=dbu.GetAnchorRadius(1);
 	if err != nil {
 		if err == AnchorDataNotFound {
 			fmt.Println(AnchorDataNotFound.Error())
